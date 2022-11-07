@@ -11,7 +11,7 @@ export const fetchGithub = <T>(
     h.append("Accept", "application/vnd.github+json");
 
     if (authToken !== undefined) {
-      h.append("Authorization", authToken);
+      h.append("Authorization", `Bearer ${authToken}`);
     }
 
     return h;
