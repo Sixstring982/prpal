@@ -13,11 +13,13 @@ export const graphCommand = (
   repo: string,
   pullRequestState: PullRequestState,
   outputFormat: OutputFormat,
+  author?: string,
   authToken?: string,
 ): Promise<void> =>
   listPullRequests({
     repo,
     pullRequestState,
+    author,
     authToken,
   })
     .then((result) =>

@@ -12,6 +12,7 @@ export interface PullRequest {
   readonly apiUrl: URL;
   readonly state: PullRequestState;
   readonly number: number;
+  readonly author: string;
   readonly title: string;
   readonly body: string;
   readonly branch: string;
