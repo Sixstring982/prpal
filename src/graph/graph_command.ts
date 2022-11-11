@@ -79,6 +79,8 @@ const renderMermaid = (prs: readonly PullRequest[]): string => {
       .replace(")", "")
       .replace("{", "")
       .replace("}", "")
+      .replace('"', "")
+      .replace("'", "")
       .replace("@", "");
 
   lines.push("graph TD");
