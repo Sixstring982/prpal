@@ -1,6 +1,5 @@
 /** @fileoverview Builds production releases for all architectures. */
 
-import { exists } from "https://deno.land/std/fs/mod.ts";
 import { METADATA } from "../../project.ts";
 
 const OUTPUT_DIRECTORY = `release/v${METADATA.version}`;
@@ -13,13 +12,16 @@ const ARCHITECTURES = [
   "x86_64-unknown-linux-gnu",
 ];
 
-const mkdirIfNotExists = (path: string): Promise<void> => {
-  if (exists(path)) {
-    return Promise.resolve();
-  }
+const mkdirIfNotExists = (path: string): Promise<void> =>
+  Deno.mkdir(path)
+    .catch((e: unknown) => {
+      // Ignore this error if the directory already exists.
+      if (e instanceof Deno.errors.AlreadyExists) {
+        return;
+      }
 
-  return Deno.mkdir(path);
-};
+      throw e;
+    });
 
 const buildRelease = ({
   architecture,
@@ -53,7 +55,10 @@ const main = () =>
           return;
         }
 
-        console.log(r.value);
+        if (r.value.code !== 0) {
+          console.error("Non-zero exit!");
+          return;
+        }
       });
     });
 
