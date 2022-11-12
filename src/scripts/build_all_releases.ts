@@ -27,39 +27,34 @@ const buildRelease = ({
   architecture,
 }: {
   readonly architecture: Architecture;
-}): Deno.Process =>
-  Deno.run({
-    cmd: [
-      "deno",
-      "compile",
-      "--allow-net",
-      `--target=${architecture}`,
-      `--output=${OUTPUT_DIRECTORY}/prpal-${architecture}`,
-      "./src/main.ts",
-    ],
+}): Promise<void> => {
+  const cmd = [
+    "deno",
+    "compile",
+    "--allow-net",
+    `--target=${architecture}`,
+    `--output=${OUTPUT_DIRECTORY}/prpal-${architecture}`,
+    "./src/main.ts",
+  ];
+
+  return Deno.run({
+    cmd,
+  }).status().then((status) => {
+    if (status.code !== 0) {
+      const error = { cmd: cmd.join(' ') };
+      throw new Error(`Non-zero exit! ${JSON.stringify(error)}`);
+    }
   });
+};
 
 const main = () =>
   mkdirIfNotExists("release")
     .then(() => mkdirIfNotExists(OUTPUT_DIRECTORY))
-    .then(() => {
-      const results = ARCHITECTURES.map((architecture) =>
-        buildRelease({ architecture })
-      );
-
-      return Promise.allSettled(results.map((x) => x.status()));
-    }).then((result) => {
-      result.forEach((r) => {
-        if (r.status === "rejected") {
-          console.error("Promise rejected", r);
-          return;
-        }
-
-        if (r.value.code !== 0) {
-          console.error("Non-zero exit!");
-          return;
-        }
-      });
+    .then(async () => {
+      // Build each architecture one-by-one.
+      for (const architecture of ARCHITECTURES) {
+        await buildRelease({ architecture });
+      }
     });
 
 await main();
